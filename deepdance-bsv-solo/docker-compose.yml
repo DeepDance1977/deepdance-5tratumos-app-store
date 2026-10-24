@@ -1,16 +1,40 @@
 
-services:
-  deepdance-bsv-solo:
-    image: ghcr.io/deepdance1977/deepdance-bsv-solo:latest
-    container_name: deepdance-bsv-solo
-    restart: unless-stopped
+version: "3.7"
 
-    ports:
-      - "8787:8787"
+services:
+  app_proxy:
+    environment:
+      APP_HOST: deepdance-bsv-solo-app
+      APP_PORT: "8787"
+      JWT_SECRET: "${JWT_SECRET}"
+    networks:
+      - umbrel_main_network
+
+  init:
+    image: alpine:3.22.1
+    restart: "no"
+    volumes:
+      - "${APP_DATA_DIR}/data:/data"
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        mkdir -p /data
+        chown -R 10001:10001 /data
+
+  app:
+    image: ghcr.io/deepdance1977/deepdance-bsv-solo:latest
+    hostname: deepdance-bsv-solo-app
+    restart: unless-stopped
+    stop_grace_period: 30s
+    depends_on:
+      init:
+        condition: service_completed_successfully
 
     environment:
       APP_PORT: "8787"
       BSV_NODE_MODE: "${BSV_NODE_MODE:-auto}"
+      BSV_RPC_TIMEOUT: "${BSV_RPC_TIMEOUT:-4}"
 
       BSV_LOCAL_RPC_URL: "${BSV_LOCAL_RPC_URL:-http://host.docker.internal:8332}"
       BSV_LOCAL_RPC_USER: "${BSV_LOCAL_RPC_USER:-}"
@@ -20,11 +44,30 @@ services:
       BSV_EXTERNAL_RPC_USER: "${BSV_EXTERNAL_RPC_USER:-}"
       BSV_EXTERNAL_RPC_PASSWORD: "${BSV_EXTERNAL_RPC_PASSWORD:-}"
 
-    volumes:
-      - "${APP_DATA_DIR:-./data}:/app/data"
-
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+    volumes:
+      - "${APP_DATA_DIR}/data:/app/data"
+
+    networks:
+      default:
+        aliases:
+          - deepdance-bsv-solo-app
+      umbrel_main_network:
+        aliases:
+          - deepdance-bsv-solo-app
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import json, urllib.request; r=urllib.request.urlopen('http://127.0.0.1:8787/api/health', timeout=3); assert json.load(r).get('ok') is True"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
     security_opt:
       - no-new-privileges:true
@@ -36,3 +79,8 @@ services:
 
     tmpfs:
       - /tmp
+
+networks:
+  umbrel_main_network:
+    external: true
+    name: umbrel_main_network
