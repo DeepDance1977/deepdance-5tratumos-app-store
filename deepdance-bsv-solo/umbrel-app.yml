@@ -1,0 +1,25 @@
+
+manifestVersion: 1
+id: deepdance-bsv-solo
+category: bitcoin
+name: DeepDance BSV Solo
+version: "0.2.0-dev"
+tagline: BSV node RPC status dashboard
+description: >-
+  Early development dashboard for checking a configured Bitcoin SV node RPC
+  endpoint. This is a development scaffold only. Stratum V1 job generation,
+  share validation, BSV coinbase construction, and valid block submission are
+  not implemented. Do not use this release for mainnet mining.
+developer: DeepDance
+website: https://github.com/DeepDance1977/deepdance-bsv-solo
+repo: https://github.com/DeepDance1977/deepdance-bsv-solo
+support: https://github.com/DeepDance1977/deepdance-bsv-solo/issues
+dependencies: []
+port: 8787
+icon: https://raw.githubusercontent.com/DeepDance1977/deepdance-5tratumos-app-store/main/deepdance-bsv-solo/icon.png
+gallery: []
+path: ""
+releaseNotes: >-
+  Initial store integration draft. Dashboard and RPC status only.
+  Mining is not production-ready.
+submitter: DeepDance
