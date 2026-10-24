@@ -1,0 +1,38 @@
+
+services:
+  deepdance-bsv-solo:
+    image: ghcr.io/deepdance1977/deepdance-bsv-solo:latest
+    container_name: deepdance-bsv-solo
+    restart: unless-stopped
+
+    ports:
+      - "8787:8787"
+
+    environment:
+      APP_PORT: "8787"
+      BSV_NODE_MODE: "${BSV_NODE_MODE:-auto}"
+
+      BSV_LOCAL_RPC_URL: "${BSV_LOCAL_RPC_URL:-http://host.docker.internal:8332}"
+      BSV_LOCAL_RPC_USER: "${BSV_LOCAL_RPC_USER:-}"
+      BSV_LOCAL_RPC_PASSWORD: "${BSV_LOCAL_RPC_PASSWORD:-}"
+
+      BSV_EXTERNAL_RPC_URL: "${BSV_EXTERNAL_RPC_URL:-}"
+      BSV_EXTERNAL_RPC_USER: "${BSV_EXTERNAL_RPC_USER:-}"
+      BSV_EXTERNAL_RPC_PASSWORD: "${BSV_EXTERNAL_RPC_PASSWORD:-}"
+
+    volumes:
+      - "${APP_DATA_DIR:-./data}:/app/data"
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    security_opt:
+      - no-new-privileges:true
+
+    cap_drop:
+      - ALL
+
+    read_only: true
+
+    tmpfs:
+      - /tmp
